@@ -21,6 +21,7 @@ import {
   MailOutlined,
   ApiOutlined,
   BellOutlined,
+  FunnelPlotOutlined,
 } from '@ant-design/icons';
 import { Avatar, Dropdown, Badge, Button } from 'antd';
 import type { MenuDataItem } from '@ant-design/pro-components';
@@ -30,6 +31,15 @@ const menuData: MenuDataItem[] = [
     path: '/dashboard',
     name: 'Dashboard',
     icon: <DashboardOutlined />,
+  },
+  {
+    path: '/leads',
+    name: 'Leads',
+    icon: <FunnelPlotOutlined />,
+    children: [
+      { path: '/leads', name: 'Pipeline View' },
+      { path: '/leads?view=list', name: 'All Leads' },
+    ],
   },
   {
     path: '/dashboard/customers',

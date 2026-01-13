@@ -173,6 +173,59 @@ export const priceBookApi = {
   getDiscounts: () => api.get<Discount[]>('/discounts'),
 };
 
+// Leads API
+export const leadsApi = {
+  getAll: (params?: Record<string, unknown>) =>
+    api.get<PaginatedResponse<Lead>>('/leads', { params }),
+  getById: (id: string) => api.get<Lead>(`/leads/${id}`),
+  create: (data: CreateLeadInput) => api.post<Lead>('/leads', data),
+  update: (id: string, data: UpdateLeadInput) => api.put<Lead>(`/leads/${id}`, data),
+  delete: (id: string) => api.delete(`/leads/${id}`),
+
+  // Pipeline operations
+  moveStage: (id: string, data: MoveLeadStageInput) =>
+    api.patch<Lead>(`/leads/${id}/stage`, data),
+  getPipelineView: (leadType: LeadType) =>
+    api.get<PipelineStageView[]>(`/leads/pipeline/${leadType}`),
+
+  // Assignment
+  assign: (id: string, assignedToId: string) =>
+    api.patch<Lead>(`/leads/${id}/assign`, { assignedToId }),
+  bulkAssign: (leadIds: string[], assignedToId: string) =>
+    api.post<{ updated: number }>('/leads/bulk-assign', { leadIds, assignedToId }),
+  unassign: (id: string) => api.patch<Lead>(`/leads/${id}/unassign`),
+
+  // Follow-up
+  setFollowUp: (id: string, followUpAt: string) =>
+    api.patch<Lead>(`/leads/${id}/follow-up`, { followUpAt }),
+  completeFollowUp: (id: string, notes?: string) =>
+    api.post<Lead>(`/leads/${id}/complete-follow-up`, { notes }),
+  getOverdueFollowUps: () => api.get<Lead[]>('/leads/overdue-followups'),
+
+  // Conversion
+  convert: (id: string, data: ConvertLeadInput) =>
+    api.post<{ lead: Lead; accountId?: string; jobId?: string }>(`/leads/${id}/convert`, data),
+
+  // Lead scoring
+  updateScore: (id: string, scoreChange: number, factor: string) =>
+    api.patch<Lead>(`/leads/${id}/score`, { scoreChange, factor }),
+
+  // Activities
+  getActivities: (id: string, params?: Record<string, unknown>) =>
+    api.get<PaginatedResponse<LeadActivity>>(`/leads/${id}/activities`, { params }),
+  createActivity: (id: string, data: CreateLeadActivityInput) =>
+    api.post<LeadActivity>(`/leads/${id}/activities`, data),
+  logContact: (id: string, method: string, direction: string, content?: string) =>
+    api.post<LeadActivity>(`/leads/${id}/log-contact`, { method, direction, content }),
+
+  // Stats
+  getStats: () => api.get<LeadStats>('/leads/stats'),
+
+  // Pipeline config
+  getPipelineConfigs: (leadType?: LeadType) =>
+    api.get<LeadPipelineConfig[]>('/leads/config/pipeline', { params: { leadType } }),
+};
+
 // Types
 export interface Account {
   id: string;
@@ -398,6 +451,151 @@ export interface PriceCalculationResult {
   basePrice: number;
   adjustments: { name: string; amount: number }[];
   totalPrice: number;
+}
+
+// Lead Types
+export type LeadType = 'residential' | 'commercial';
+export type LeadTemperature = 'cold' | 'warm' | 'hot';
+export type LeadSource = 'website' | 'google_ads' | 'facebook_ads' | 'referral' | 'door_to_door' | 'yard_sign' | 'direct_mail' | 'phone_call' | 'email_campaign' | 'trade_show' | 'partner' | 'other';
+
+export interface Lead {
+  id: string;
+  leadType: LeadType;
+  pipelineStage: string;
+  temperature: LeadTemperature;
+  firstName: string;
+  lastName: string;
+  email?: string;
+  phone?: string;
+  companyName?: string;
+  streetAddress?: string;
+  city?: string;
+  state?: string;
+  postalCode?: string;
+  source: LeadSource;
+  sourceDetail?: string;
+  referralSource?: string;
+  servicesInterested?: string[];
+  estimatedValue?: number;
+  leadScore: number;
+  assignedToId?: string;
+  assignedAt?: string;
+  nextFollowUpAt?: string;
+  followUpCount: number;
+  lastContactedAt?: string;
+  lastContactMethod?: string;
+  optedOutMarketing: boolean;
+  convertedAt?: string;
+  convertedToAccountId?: string;
+  convertedToJobId?: string;
+  lostReason?: string;
+  lostToCompetitor?: string;
+  lostAt?: string;
+  notes?: string;
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LeadActivity {
+  id: string;
+  leadId: string;
+  activityType: string;
+  title: string;
+  description?: string;
+  oldValue?: string;
+  newValue?: string;
+  content?: string;
+  communicationDirection?: string;
+  performedById?: string;
+  createdAt: string;
+}
+
+export interface LeadStats {
+  total: number;
+  byType: Record<LeadType, number>;
+  byStage: Record<string, number>;
+  byTemperature: Record<LeadTemperature, number>;
+  bySource: Record<LeadSource, number>;
+  convertedThisMonth: number;
+  lostThisMonth: number;
+  avgTimeToConversion: number;
+  followUpsDue: number;
+}
+
+export interface LeadPipelineConfig {
+  id: string;
+  leadType: LeadType;
+  stage: string;
+  stageOrder: number;
+  displayName: string;
+  color: string;
+  autoDripSequenceId?: string;
+  autoFollowUpDays?: number;
+  slaDays?: number;
+  isActive: boolean;
+  isWonStage: boolean;
+  isLostStage: boolean;
+}
+
+export interface PipelineStageView {
+  stage: string;
+  displayName: string;
+  color: string;
+  leads: Lead[];
+  count: number;
+  totalValue: number;
+}
+
+export interface CreateLeadInput {
+  leadType: LeadType;
+  pipelineStage?: string;
+  temperature?: LeadTemperature;
+  firstName: string;
+  lastName: string;
+  email?: string;
+  phone?: string;
+  companyName?: string;
+  streetAddress?: string;
+  city?: string;
+  state?: string;
+  postalCode?: string;
+  source: LeadSource;
+  sourceDetail?: string;
+  referralSource?: string;
+  servicesInterested?: string[];
+  estimatedValue?: number;
+  assignedToId?: string;
+  nextFollowUpAt?: string;
+  notes?: string;
+  description?: string;
+}
+
+export interface UpdateLeadInput extends Partial<CreateLeadInput> {
+  leadScore?: number;
+  optedOutMarketing?: boolean;
+}
+
+export interface MoveLeadStageInput {
+  newStage: string;
+  reason?: string;
+  lostToCompetitor?: string;
+}
+
+export interface ConvertLeadInput {
+  createAccount?: boolean;
+  existingAccountId?: string;
+  createJob?: boolean;
+  serviceIds?: string[];
+  jobNotes?: string;
+}
+
+export interface CreateLeadActivityInput {
+  activityType: string;
+  title: string;
+  description?: string;
+  content?: string;
+  communicationDirection?: string;
 }
 
 export default api;

@@ -20,6 +20,7 @@ import { MarketingModule } from './modules/marketing/marketing.module';
 import { QuickBooksModule } from './modules/integrations/quickbooks/quickbooks.module';
 import { CompanyCamModule } from './modules/integrations/companycam/companycam.module';
 import { WebhooksModule } from './modules/webhooks/webhooks.module';
+import { LeadsModule } from './modules/leads/leads.module';
 
 // Configuration
 import configuration from './config/configuration';
@@ -70,6 +71,7 @@ import { typeOrmConfig } from './config/typeorm.config';
     QuickBooksModule,
     CompanyCamModule,
     WebhooksModule,
+    LeadsModule,
   ],
 })
 export class AppModule {}
