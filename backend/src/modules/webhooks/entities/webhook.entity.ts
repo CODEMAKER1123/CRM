@@ -4,6 +4,9 @@ import {
   ManyToOne,
   JoinColumn,
   Index,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { TenantBaseEntity } from '@/common/entities/base.entity';
 import { Tenant } from '@/modules/tenants/entities/tenant.entity';
@@ -126,7 +129,19 @@ export class WebhookDelivery extends TenantBaseEntity {
 @Entity('inbound_webhooks')
 @Index(['tenantId', 'source', 'createdAt'])
 @Index(['tenantId', 'processed'])
-export class InboundWebhook extends TenantBaseEntity {
+export class InboundWebhook {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt: Date;
+
+  @Column({ name: 'tenant_id', type: 'uuid', nullable: true })
+  tenantId?: string;
+
   @ManyToOne(() => Tenant, { onDelete: 'CASCADE', nullable: true })
   @JoinColumn({ name: 'tenant_id' })
   tenant?: Tenant;

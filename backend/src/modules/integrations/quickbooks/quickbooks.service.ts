@@ -60,7 +60,7 @@ export class QuickBooksService {
     });
     return {
       connected: !!connection?.isActive,
-      connection,
+      connection: connection ?? undefined,
     };
   }
 

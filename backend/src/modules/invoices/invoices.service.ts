@@ -31,7 +31,7 @@ export class InvoicesService {
       });
 
       // Calculate due date from payment terms if not provided
-      if (!invoice.dueDate && invoice.paymentTerms) {
+      if (!invoice.dueDate && invoice.paymentTerms && invoice.issueDate) {
         const dueDate = new Date(invoice.issueDate);
         dueDate.setDate(dueDate.getDate() + invoice.paymentTerms);
         invoice.dueDate = dueDate;
@@ -75,7 +75,7 @@ export class InvoicesService {
 
     if (!invoice) return;
 
-    const subtotal = lineItems.reduce((sum, item) => sum + Number(item.total), 0);
+    const subtotal = lineItems.reduce((sum: number, item: InvoiceLineItem) => sum + Number(item.total), 0);
 
     const discountAmount = invoice.discountType === 'percent'
       ? subtotal * (invoice.discountValue / 100)
