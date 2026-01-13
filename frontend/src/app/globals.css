@@ -1,0 +1,118 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 245, 247, 250;
+  --background-end-rgb: 255, 255, 255;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+  min-height: 100vh;
+}
+
+/* Ant Design Pro Layout overrides */
+.ant-pro-layout {
+  min-height: 100vh;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
+}
+
+/* Card hover effects */
+.ant-card {
+  transition: box-shadow 0.3s ease;
+}
+
+.ant-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Status badge colors */
+.status-lead { background-color: #e6f7ff; color: #1890ff; }
+.status-qualified { background-color: #fff7e6; color: #fa8c16; }
+.status-scheduled { background-color: #f6ffed; color: #52c41a; }
+.status-in-progress { background-color: #fff0f6; color: #eb2f96; }
+.status-completed { background-color: #f9f0ff; color: #722ed1; }
+.status-invoiced { background-color: #e6fffb; color: #13c2c2; }
+.status-paid { background-color: #f6ffed; color: #389e0d; }
+.status-cancelled { background-color: #fff1f0; color: #ff4d4f; }
+
+/* Kanban board styles */
+.kanban-column {
+  min-height: 500px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.kanban-card {
+  background: white;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.kanban-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.kanban-card.dragging {
+  opacity: 0.8;
+  transform: rotate(3deg);
+}
+
+/* Calendar custom styles */
+.calendar-job-event {
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  .ant-layout-sider,
+  .ant-layout-header {
+    display: none !important;
+  }
+}
