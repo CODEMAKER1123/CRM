@@ -27,13 +27,13 @@ export class JobsService {
       ...createJobDto,
       tenantId,
       jobNumber,
-      status: JobStatus.LEAD,
-    });
+      status: JobStatus.UNSCHEDULED,
+    } as any);
 
-    const savedJob = await this.jobRepository.save(job);
+    const savedJob: Job = await this.jobRepository.save(job as any);
 
     // Create initial status history
-    await this.createStatusHistory(tenantId, savedJob.id, null, JobStatus.LEAD);
+    await this.createStatusHistory(tenantId, savedJob.id, null, JobStatus.UNSCHEDULED);
 
     return savedJob;
   }
@@ -139,8 +139,6 @@ export class JobsService {
       status: job.status,
       scheduledDate: job.scheduledDate,
       estimateId: job.estimateId,
-      hasContactInfo: true, // Should check actual contact info
-      isFullyPaid: false, // Should check actual payment status
     };
 
     const event: JobEvent = this.buildEvent(transitionDto);
@@ -164,12 +162,7 @@ export class JobsService {
       job.scheduledDate = transitionDto.scheduledDate;
     }
 
-    if (transitionDto.action === 'START_WORK') {
-      job.actualStartTime = new Date();
-    }
-
     if (transitionDto.action === 'COMPLETE_WORK') {
-      job.actualEndTime = new Date();
       job.completedAt = new Date();
     }
 
@@ -197,8 +190,6 @@ export class JobsService {
       status: job.status,
       scheduledDate: job.scheduledDate,
       estimateId: job.estimateId,
-      hasContactInfo: true,
-      isFullyPaid: false,
     };
 
     return this.jobStateMachine.getAvailableTransitions(context);
@@ -257,7 +248,7 @@ export class JobsService {
       endDate,
     });
     queryBuilder.andWhere('job.status NOT IN (:...excludedStatuses)', {
-      excludedStatuses: [JobStatus.CANCELLED, JobStatus.LOST],
+      excludedStatuses: [JobStatus.CANCELLED],
     });
 
     if (crewId) {
@@ -292,11 +283,11 @@ export class JobsService {
     const history = this.statusHistoryRepository.create({
       tenantId,
       jobId,
-      previousStatus,
+      previousStatus: previousStatus ?? undefined,
       newStatus,
       changedBy,
       reason,
-    });
+    } as any);
     await this.statusHistoryRepository.save(history);
   }
 
@@ -323,30 +314,20 @@ export class JobsService {
 
   private buildEvent(transitionDto: JobTransitionDto): JobEvent {
     switch (transitionDto.action) {
-      case 'QUALIFY':
-        return { type: 'QUALIFY' };
-      case 'SEND_ESTIMATE':
-        return { type: 'SEND_ESTIMATE' };
-      case 'APPROVE_ESTIMATE':
-        return { type: 'APPROVE_ESTIMATE' };
-      case 'REJECT_ESTIMATE':
-        return { type: 'REJECT_ESTIMATE' };
       case 'SCHEDULE':
         return { type: 'SCHEDULE', scheduledDate: transitionDto.scheduledDate! };
       case 'DISPATCH':
         return { type: 'DISPATCH' };
+      case 'ARRIVE':
+        return { type: 'ARRIVE' };
       case 'START_WORK':
         return { type: 'START_WORK' };
       case 'COMPLETE_WORK':
         return { type: 'COMPLETE_WORK' };
-      case 'CREATE_INVOICE':
-        return { type: 'CREATE_INVOICE', invoiceId: transitionDto.invoiceId! };
-      case 'MARK_PAID':
-        return { type: 'MARK_PAID' };
+      case 'MARK_CALLBACK':
+        return { type: 'MARK_CALLBACK', reason: transitionDto.reason || '' };
       case 'CANCEL':
         return { type: 'CANCEL', reason: transitionDto.reason || '' };
-      case 'MARK_LOST':
-        return { type: 'MARK_LOST', reason: transitionDto.reason || '' };
       default:
         throw new BadRequestException(`Unknown action: ${transitionDto.action}`);
     }

@@ -21,6 +21,9 @@ import {
   MailOutlined,
   ApiOutlined,
   BellOutlined,
+  FunnelPlotOutlined,
+  WalletOutlined,
+  ThunderboltOutlined,
 } from '@ant-design/icons';
 import { Avatar, Dropdown, Badge, Button } from 'antd';
 import type { MenuDataItem } from '@ant-design/pro-components';
@@ -30,6 +33,15 @@ const menuData: MenuDataItem[] = [
     path: '/dashboard',
     name: 'Dashboard',
     icon: <DashboardOutlined />,
+  },
+  {
+    path: '/dashboard/leads',
+    name: 'Leads',
+    icon: <FunnelPlotOutlined />,
+    children: [
+      { path: '/dashboard/leads', name: 'Pipeline Board' },
+      { path: '/dashboard/leads/list', name: 'All Leads' },
+    ],
   },
   {
     path: '/dashboard/customers',
@@ -86,6 +98,16 @@ const menuData: MenuDataItem[] = [
     icon: <ShopOutlined />,
   },
   {
+    path: '/dashboard/commissions',
+    name: 'Commissions',
+    icon: <WalletOutlined />,
+    children: [
+      { path: '/dashboard/commissions', name: 'Overview' },
+      { path: '/dashboard/commissions/rules', name: 'Rules' },
+      { path: '/dashboard/commissions/records', name: 'Records' },
+    ],
+  },
+  {
     path: '/dashboard/marketing',
     name: 'Marketing',
     icon: <MailOutlined />,
@@ -93,6 +115,15 @@ const menuData: MenuDataItem[] = [
       { path: '/dashboard/marketing/campaigns', name: 'Campaigns' },
       { path: '/dashboard/marketing/automations', name: 'Automations' },
       { path: '/dashboard/marketing/templates', name: 'Templates' },
+    ],
+  },
+  {
+    path: '/dashboard/automations',
+    name: 'Automations',
+    icon: <ThunderboltOutlined />,
+    children: [
+      { path: '/dashboard/automations', name: 'Rules' },
+      { path: '/dashboard/automations/executions', name: 'Execution Log' },
     ],
   },
   {

@@ -7,7 +7,7 @@ import {
   Index,
 } from 'typeorm';
 import { TenantBaseEntity } from '@/common/entities/base.entity';
-import { AccountType, LeadSource } from '@/common/enums';
+import { AccountType, LifecycleStage, LeadSource, ContactMethod } from '@/common/enums';
 import { Tenant } from '@/modules/tenants/entities/tenant.entity';
 import { Contact } from '@/modules/contacts/entities/contact.entity';
 import { Address } from '@/modules/addresses/entities/address.entity';
@@ -17,7 +17,10 @@ import { Invoice } from '@/modules/invoices/entities/invoice.entity';
 
 @Entity('accounts')
 @Index(['tenantId', 'accountType'])
+@Index(['tenantId', 'lifecycleStage'])
 @Index(['tenantId', 'createdAt'])
+@Index(['tenantId', 'primaryPhone'])
+@Index(['tenantId', 'primaryEmail'])
 export class Account extends TenantBaseEntity {
   @ManyToOne(() => Tenant, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'tenant_id' })
@@ -39,6 +42,14 @@ export class Account extends TenantBaseEntity {
     default: AccountType.RESIDENTIAL,
   })
   accountType: AccountType;
+
+  @Column({
+    name: 'lifecycle_stage',
+    type: 'enum',
+    enum: LifecycleStage,
+    default: LifecycleStage.LEAD,
+  })
+  lifecycleStage: LifecycleStage;
 
   // Company info for commercial accounts
   @Column({ name: 'company_name', length: 255, nullable: true })
@@ -68,6 +79,15 @@ export class Account extends TenantBaseEntity {
 
   @Column({ name: 'referred_by_account_id', type: 'uuid', nullable: true })
   referredByAccountId?: string;
+
+  // Preferred contact method
+  @Column({
+    name: 'preferred_contact_method',
+    type: 'enum',
+    enum: ContactMethod,
+    nullable: true,
+  })
+  preferredContactMethod?: ContactMethod;
 
   // Financial
   @Column({
@@ -125,6 +145,10 @@ export class Account extends TenantBaseEntity {
   @Column({ type: 'text', array: true, nullable: true })
   tags?: string[];
 
+  // Merged record tracking
+  @Column({ name: 'merged_into_id', type: 'uuid', nullable: true })
+  mergedIntoId?: string;
+
   // Relations
   @OneToMany(() => Contact, (contact) => contact.account)
   contacts: Contact[];
@@ -140,4 +164,46 @@ export class Account extends TenantBaseEntity {
 
   @OneToMany(() => Invoice, (invoice) => invoice.account)
   invoices: Invoice[];
+
+  @OneToMany(() => LifecycleStageHistory, (history) => history.account)
+  lifecycleHistory: LifecycleStageHistory[];
+}
+
+@Entity('lifecycle_stage_history')
+@Index(['accountId', 'changedAt'])
+export class LifecycleStageHistory extends TenantBaseEntity {
+  @ManyToOne(() => Tenant, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'tenant_id' })
+  tenant: Tenant;
+
+  @Column({ name: 'account_id', type: 'uuid' })
+  accountId: string;
+
+  @ManyToOne(() => Account, (account) => account.lifecycleHistory, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'account_id' })
+  account: Account;
+
+  @Column({
+    name: 'previous_stage',
+    type: 'enum',
+    enum: LifecycleStage,
+    nullable: true,
+  })
+  previousStage?: LifecycleStage;
+
+  @Column({
+    name: 'new_stage',
+    type: 'enum',
+    enum: LifecycleStage,
+  })
+  newStage: LifecycleStage;
+
+  @Column({ name: 'changed_by', type: 'uuid', nullable: true })
+  changedBy?: string;
+
+  @Column({ name: 'changed_at', type: 'timestamp', default: () => 'NOW()' })
+  changedAt: Date;
+
+  @Column({ type: 'text', nullable: true })
+  reason?: string;
 }

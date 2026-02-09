@@ -39,7 +39,7 @@ export class User extends TenantBaseEntity {
   @Column({
     type: 'enum',
     enum: UserRole,
-    default: UserRole.FIELD_CREW,
+    default: UserRole.CREW_MEMBER,
   })
   role: UserRole;
 

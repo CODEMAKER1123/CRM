@@ -1,34 +1,87 @@
-// Account Types
+// Customer / Account Types
 export enum AccountType {
   RESIDENTIAL = 'residential',
   COMMERCIAL = 'commercial',
+  PROPERTY_MGMT = 'property_mgmt',
+  HOA = 'hoa',
+  GOVERNMENT = 'government',
+  FLEET = 'fleet',
+}
+
+// Customer Lifecycle Stage
+export enum LifecycleStage {
+  LEAD = 'lead',
+  QUALIFIED = 'qualified',
+  QUOTED = 'quoted',
+  WON = 'won',
+  ACTIVE = 'active',
+  RECURRING = 'recurring',
+  AT_RISK = 'at_risk',
+  LOST = 'lost',
+}
+
+// Business Line
+export enum BusinessLine {
+  POWER_WASH = 'power_wash',
+  HOLIDAY_LIGHTS = 'holiday_lights',
+}
+
+// Pipeline Type
+export enum PipelineType {
+  COMMERCIAL = 'commercial',
+  RESIDENTIAL = 'residential',
+  HOLIDAY_LIGHTS = 'holiday_lights',
+}
+
+// Lead Source Type (for commission calculations)
+export enum LeadSourceType {
+  SELF_GENERATED = 'self_generated',
+  COMPANY_GENERATED = 'company_generated',
+}
+
+// Contact Method
+export enum ContactMethod {
+  PHONE = 'phone',
+  TEXT = 'text',
+  EMAIL = 'email',
+}
+
+// Property Type
+export enum PropertyType {
+  SINGLE_FAMILY = 'single_family',
+  MULTI_FAMILY = 'multi_family',
+  COMMERCIAL = 'commercial',
+  INDUSTRIAL = 'industrial',
+  MUNICIPAL = 'municipal',
 }
 
 // Job Types
 export enum JobType {
   POWER_WASHING = 'power_washing',
-  CHRISTMAS_LIGHTS_INSTALL = 'christmas_lights_install',
-  CHRISTMAS_LIGHTS_REMOVAL = 'christmas_lights_removal',
+  HOUSE_WASH = 'house_wash',
+  ROOF_WASH = 'roof_wash',
+  CONCRETE_CLEANING = 'concrete_cleaning',
   GUTTER_CLEANING = 'gutter_cleaning',
   WINDOW_CLEANING = 'window_cleaning',
-  ROOF_CLEANING = 'roof_cleaning',
+  FLEET_WASH = 'fleet_wash',
+  DUMPSTER_PAD = 'dumpster_pad',
+  BUILDING_WASH = 'building_wash',
+  SURFACE_SEALING = 'surface_sealing',
+  CHRISTMAS_LIGHTS_INSTALL = 'christmas_lights_install',
+  CHRISTMAS_LIGHTS_REMOVAL = 'christmas_lights_removal',
   OTHER = 'other',
 }
 
 // Job Status - follows state machine lifecycle
 export enum JobStatus {
-  LEAD = 'lead',
-  QUALIFIED = 'qualified',
-  ESTIMATE_SENT = 'estimate_sent',
-  ESTIMATE_APPROVED = 'estimate_approved',
+  UNSCHEDULED = 'unscheduled',
   SCHEDULED = 'scheduled',
-  DISPATCHED = 'dispatched',
+  EN_ROUTE = 'en_route',
+  ON_SITE = 'on_site',
   IN_PROGRESS = 'in_progress',
-  COMPLETED = 'completed',
-  INVOICED = 'invoiced',
-  PAID = 'paid',
+  COMPLETE = 'complete',
+  CALLBACK = 'callback',
   CANCELLED = 'cancelled',
-  LOST = 'lost',
 }
 
 // Job Priority
@@ -39,15 +92,53 @@ export enum JobPriority {
   URGENT = 'urgent',
 }
 
+// Deposit Status
+export enum DepositStatus {
+  DEPOSIT_PENDING = 'deposit_pending',
+  DEPOSIT_PAID = 'deposit_paid',
+  PREPAID = 'prepaid',
+  NOT_REQUIRED = 'not_required',
+}
+
+// Holiday Job Type
+export enum HolidayJobType {
+  INSTALL = 'install',
+  TAKEDOWN = 'takedown',
+}
+
 // Estimate Status
 export enum EstimateStatus {
   DRAFT = 'draft',
   SENT = 'sent',
   VIEWED = 'viewed',
   APPROVED = 'approved',
+  DECLINED = 'declined',
+  SAVE_OFFERED = 'save_offered',
+  SAVE_ACCEPTED = 'save_accepted',
   REJECTED = 'rejected',
-  EXPIRED = 'expired',
   CONVERTED = 'converted',
+  EXPIRED = 'expired',
+}
+
+// Estimate Tier
+export enum EstimateTier {
+  GOOD = 'good',
+  BETTER = 'better',
+  BEST = 'best',
+}
+
+// Discount Type
+export enum DiscountType {
+  PERCENTAGE = 'percentage',
+  FIXED = 'fixed',
+}
+
+// Save Offer Approval Status
+export enum ApprovalStatus {
+  AUTO_APPROVED = 'auto_approved',
+  PENDING_APPROVAL = 'pending_approval',
+  APPROVED = 'approved',
+  DENIED = 'denied',
 }
 
 // Invoice Status
@@ -59,19 +150,21 @@ export enum InvoiceStatus {
   PAID = 'paid',
   OVERDUE = 'overdue',
   VOID = 'void',
-  WRITTEN_OFF = 'written_off',
+}
+
+// Invoice Type
+export enum InvoiceType {
+  STANDARD = 'standard',
+  DEPOSIT = 'deposit',
+  BALANCE = 'balance',
 }
 
 // Payment Method
 export enum PaymentMethod {
-  CASH = 'cash',
-  CHECK = 'check',
   CREDIT_CARD = 'credit_card',
-  DEBIT_CARD = 'debit_card',
   ACH = 'ach',
-  STRIPE = 'stripe',
-  QUICKBOOKS_PAYMENT = 'quickbooks_payment',
-  OTHER = 'other',
+  CHECK = 'check',
+  CASH = 'cash',
 }
 
 // Payment Status
@@ -101,8 +194,7 @@ export enum CrewSpecialty {
 // Crew Member Role
 export enum CrewMemberRole {
   LEAD = 'lead',
-  ASSISTANT = 'assistant',
-  TRAINEE = 'trainee',
+  MEMBER = 'member',
 }
 
 // Route Stop Status
@@ -124,18 +216,19 @@ export enum AddressType {
 
 // Lead Source
 export enum LeadSource {
+  GOOGLE_LSA = 'google_lsa',
+  FACEBOOK = 'facebook',
   WEBSITE = 'website',
   REFERRAL = 'referral',
+  DOOR_HANGER = 'door_hanger',
+  MANUAL = 'manual',
   GOOGLE_ADS = 'google_ads',
-  FACEBOOK = 'facebook',
   INSTAGRAM = 'instagram',
   NEXTDOOR = 'nextdoor',
   THUMBTACK = 'thumbtack',
-  HOMEADVISOR = 'homeadvisor',
   ANGIS_LIST = 'angis_list',
   YELP = 'yelp',
   DIRECT_MAIL = 'direct_mail',
-  DOOR_HANGER = 'door_hanger',
   YARD_SIGN = 'yard_sign',
   REPEAT_CUSTOMER = 'repeat_customer',
   PHONE_CALL = 'phone_call',
@@ -160,14 +253,83 @@ export enum PricingType {
   FORMULA = 'formula',
 }
 
-// User Role
+// User Role (maps to spec Section 6)
 export enum UserRole {
-  ADMIN = 'admin',
+  OWNER = 'owner',
+  OPS_MANAGER = 'ops_manager',
   SALES_REP = 'sales_rep',
-  OFFICE_DISPATCH = 'office_dispatch',
-  FIELD_CREW = 'field_crew',
-  FRANCHISE_LEADERSHIP = 'franchise_leadership',
-  CUSTOMER = 'customer',
+  OFFICE_ADMIN = 'office_admin',
+  CREW_LEAD = 'crew_lead',
+  CREW_MEMBER = 'crew_member',
+}
+
+// Activity Type
+export enum ActivityType {
+  CALL = 'call',
+  TEXT = 'text',
+  EMAIL = 'email',
+  NOTE = 'note',
+  MEETING = 'meeting',
+  SITE_VISIT = 'site_visit',
+}
+
+// Activity Direction
+export enum ActivityDirection {
+  INBOUND = 'inbound',
+  OUTBOUND = 'outbound',
+}
+
+// Photo Tag
+export enum PhotoTag {
+  BEFORE = 'before',
+  DURING = 'during',
+  AFTER = 'after',
+}
+
+// Time Entry Type
+export enum TimeEntryType {
+  SHIFT = 'shift',
+  JOB = 'job',
+  BREAK = 'break',
+}
+
+// Commission Role Type
+export enum CommissionRoleType {
+  CREW = 'crew',
+  SALES_REP = 'sales_rep',
+}
+
+// Commission Base
+export enum CommissionBase {
+  GROSS_REVENUE = 'gross_revenue',
+  NET_OF_EXPENSES = 'net_of_expenses',
+  CUSTOM = 'custom',
+}
+
+// Commission Trigger
+export enum CommissionTrigger {
+  ON_JOB_COMPLETE = 'on_job_complete',
+  ON_INVOICE_PAID = 'on_invoice_paid',
+}
+
+// Commission Status
+export enum CommissionStatus {
+  PENDING = 'pending',
+  APPROVED = 'approved',
+  PAID = 'paid',
+}
+
+// Bonus Metric
+export enum BonusMetric {
+  MONTHLY_REVENUE = 'monthly_revenue',
+  CONTRACT_SIGNED = 'contract_signed',
+}
+
+// Bonus Period
+export enum BonusPeriod {
+  MONTHLY = 'monthly',
+  QUARTERLY = 'quarterly',
+  PER_OCCURRENCE = 'per_occurrence',
 }
 
 // Marketing Campaign Type
@@ -212,4 +374,48 @@ export enum EnrollmentStatus {
   COMPLETED = 'completed',
   EXITED = 'exited',
   FAILED = 'failed',
+}
+
+// Lead Pipeline Stages
+export enum CommercialPipelineStage {
+  NEW = 'new',
+  CONTACTED = 'contacted',
+  SITE_VISIT_SCHEDULED = 'site_visit_scheduled',
+  SITE_VISIT_COMPLETED = 'site_visit_completed',
+  PROPOSAL_SENT = 'proposal_sent',
+  FOLLOW_UP = 'follow_up',
+  NEGOTIATION = 'negotiation',
+  WON = 'won',
+  LOST = 'lost',
+}
+
+export enum ResidentialPipelineStage {
+  NEW = 'new',
+  CONTACTED = 'contacted',
+  ESTIMATE_SENT = 'estimate_sent',
+  FOLLOW_UP = 'follow_up',
+  WON = 'won',
+  LOST = 'lost',
+}
+
+export enum HolidayLightsPipelineStage {
+  NEW = 'new',
+  CONSULTED = 'consulted',
+  DESIGN_PROPOSAL_SENT = 'design_proposal_sent',
+  APPROVED = 'approved',
+  INSTALL_SCHEDULED = 'install_scheduled',
+  INSTALLED = 'installed',
+  TAKEDOWN_SCHEDULED = 'takedown_scheduled',
+  COMPLETE = 'complete',
+  LOST = 'lost',
+}
+
+// Loss Reason
+export enum LossReason {
+  PRICE = 'price',
+  TIMING = 'timing',
+  COMPETITOR = 'competitor',
+  NO_RESPONSE = 'no_response',
+  NOT_QUALIFIED = 'not_qualified',
+  OTHER = 'other',
 }

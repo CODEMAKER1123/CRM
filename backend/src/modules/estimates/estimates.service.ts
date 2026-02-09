@@ -29,23 +29,24 @@ export class EstimatesService {
         ...estimateData,
         tenantId,
         status: EstimateStatus.DRAFT,
-      });
+      } as any);
 
-      const savedEstimate = await queryRunner.manager.save(estimate);
+      const savedEstimate: Estimate = await queryRunner.manager.save(Estimate, estimate as any);
 
       if (lineItems && lineItems.length > 0) {
-        const lineItemEntities = lineItems.map((item, index) => {
-          const total = item.quantity * item.unitPrice * (1 - (item.discountPercent || 0) / 100);
-          return this.lineItemRepository.create({
+        const lineItemEntities = lineItems.map((item: any, index: number) => {
+          const total = item.quantity * item.unitPrice;
+          return {
             ...item,
             tenantId,
             estimateId: savedEstimate.id,
             total,
-            discountAmount: item.quantity * item.unitPrice * ((item.discountPercent || 0) / 100),
+            totalCents: Math.round(total * 100),
+            unitPriceCents: Math.round(item.unitPrice * 100),
             sortOrder: item.sortOrder ?? index,
-          });
+          };
         });
-        await queryRunner.manager.save(lineItemEntities);
+        await queryRunner.manager.save(EstimateLineItem, lineItemEntities);
       }
 
       await this.calculateTotals(savedEstimate.id, queryRunner.manager);
@@ -70,8 +71,8 @@ export class EstimatesService {
     if (!estimate) return;
 
     const subtotal = lineItems
-      .filter(item => !item.optional)
-      .reduce((sum, item) => sum + Number(item.total), 0);
+      .filter((item: any) => !item.optional)
+      .reduce((sum: number, item: any) => sum + Number(item.total), 0);
 
     const discountAmount = estimate.discountType === 'percent'
       ? subtotal * (estimate.discountValue / 100)
@@ -148,8 +149,8 @@ export class EstimatesService {
   async update(tenantId: string, id: string, updateEstimateDto: UpdateEstimateDto): Promise<Estimate> {
     const estimate = await this.findOne(tenantId, id);
 
-    if (estimate.status === EstimateStatus.APPROVED || estimate.status === EstimateStatus.CONVERTED) {
-      throw new BadRequestException('Cannot update approved or converted estimates');
+    if (estimate.status === EstimateStatus.APPROVED || estimate.status === EstimateStatus.CONVERTED || estimate.status === EstimateStatus.DECLINED) {
+      throw new BadRequestException('Cannot update approved, declined, or converted estimates');
     }
 
     const { lineItems, ...estimateData } = updateEstimateDto;
@@ -159,18 +160,19 @@ export class EstimatesService {
     if (lineItems !== undefined) {
       await this.lineItemRepository.delete({ estimateId: id });
       if (lineItems.length > 0) {
-        const lineItemEntities = lineItems.map((item, index) => {
-          const total = item.quantity * item.unitPrice * (1 - (item.discountPercent || 0) / 100);
-          return this.lineItemRepository.create({
+        const lineItemEntities = lineItems.map((item: any, index: number) => {
+          const total = item.quantity * item.unitPrice;
+          return {
             ...item,
             tenantId,
             estimateId: id,
             total,
-            discountAmount: item.quantity * item.unitPrice * ((item.discountPercent || 0) / 100),
+            totalCents: Math.round(total * 100),
+            unitPriceCents: Math.round(item.unitPrice * 100),
             sortOrder: item.sortOrder ?? index,
-          });
+          };
         });
-        await this.lineItemRepository.save(lineItemEntities);
+        await this.lineItemRepository.save(lineItemEntities as any);
       }
       await this.calculateTotals(id);
     }
@@ -196,25 +198,22 @@ export class EstimatesService {
       sentAt: undefined,
       viewedAt: undefined,
       approvedAt: undefined,
-      rejectedAt: undefined,
-      convertedAt: undefined,
+      declinedAt: undefined,
       createdAt: undefined,
       updatedAt: undefined,
-    });
+    } as any);
 
-    const savedVersion = await this.estimateRepository.save(newVersion);
+    const savedVersion: Estimate = await this.estimateRepository.save(newVersion as any);
 
     // Copy line items
-    const lineItems = original.lineItems.map(item =>
-      this.lineItemRepository.create({
-        ...item,
-        id: undefined,
-        estimateId: savedVersion.id,
-        createdAt: undefined,
-        updatedAt: undefined,
-      }),
-    );
-    await this.lineItemRepository.save(lineItems);
+    const lineItems = original.lineItems.map((item: any) => ({
+      ...item,
+      id: undefined,
+      estimateId: savedVersion.id,
+      createdAt: undefined,
+      updatedAt: undefined,
+    }));
+    await this.lineItemRepository.save(lineItems as any);
 
     return this.findOne(tenantId, savedVersion.id);
   }
@@ -243,9 +242,7 @@ export class EstimatesService {
 
     estimate.status = EstimateStatus.APPROVED;
     estimate.approvedAt = new Date();
-    estimate.approvedByName = approveDto.approvedByName;
-    estimate.approvedByEmail = approveDto.approvedByEmail;
-    estimate.selectedOption = approveDto.selectedOption;
+    estimate.signedBy = approveDto.approvedByName;
 
     if (approveDto.signatureData) {
       const signature = this.signatureRepository.create({
@@ -264,16 +261,15 @@ export class EstimatesService {
 
   async reject(tenantId: string, id: string, reason: string): Promise<Estimate> {
     const estimate = await this.findOne(tenantId, id);
-    estimate.status = EstimateStatus.REJECTED;
-    estimate.rejectedAt = new Date();
-    estimate.rejectionReason = reason;
+    estimate.status = EstimateStatus.DECLINED;
+    estimate.declinedAt = new Date();
+    estimate.declineReason = reason;
     return this.estimateRepository.save(estimate);
   }
 
   async convertToJob(tenantId: string, id: string, jobId: string): Promise<Estimate> {
     const estimate = await this.findOne(tenantId, id);
     estimate.status = EstimateStatus.CONVERTED;
-    estimate.convertedAt = new Date();
     estimate.convertedJobId = jobId;
     return this.estimateRepository.save(estimate);
   }

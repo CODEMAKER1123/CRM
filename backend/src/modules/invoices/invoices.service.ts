@@ -23,35 +23,34 @@ export class InvoicesService {
     try {
       const { lineItems, ...invoiceData } = createInvoiceDto;
 
-      const invoice = this.invoiceRepository.create({
+      const invoiceEntity: any = {
         ...invoiceData,
         tenantId,
         status: InvoiceStatus.DRAFT,
-        issueDate: invoiceData.issueDate || new Date(),
-      });
+        issuedDate: invoiceData.issueDate || new Date(),
+      };
 
       // Calculate due date from payment terms if not provided
-      if (!invoice.dueDate && invoice.paymentTerms) {
-        const dueDate = new Date(invoice.issueDate);
-        dueDate.setDate(dueDate.getDate() + invoice.paymentTerms);
-        invoice.dueDate = dueDate;
+      if (!invoiceEntity.dueDate && invoiceEntity.paymentTerms) {
+        const dueDate = new Date(invoiceEntity.issuedDate);
+        dueDate.setDate(dueDate.getDate() + invoiceEntity.paymentTerms);
+        invoiceEntity.dueDate = dueDate;
       }
 
-      const savedInvoice = await queryRunner.manager.save(invoice);
+      const savedInvoice: Invoice = await queryRunner.manager.save(Invoice, invoiceEntity);
 
       if (lineItems && lineItems.length > 0) {
-        const lineItemEntities = lineItems.map((item, index) => {
-          const total = item.quantity * item.unitPrice * (1 - (item.discountPercent || 0) / 100);
-          return this.lineItemRepository.create({
+        const lineItemEntities = lineItems.map((item: any, index: number) => {
+          const total = item.quantity * item.unitPrice;
+          return {
             ...item,
             tenantId,
             invoiceId: savedInvoice.id,
             total,
-            discountAmount: item.quantity * item.unitPrice * ((item.discountPercent || 0) / 100),
             sortOrder: item.sortOrder ?? index,
-          });
+          };
         });
-        await queryRunner.manager.save(lineItemEntities);
+        await queryRunner.manager.save(InvoiceLineItem, lineItemEntities);
       }
 
       await this.calculateTotals(savedInvoice.id, queryRunner.manager);
@@ -75,7 +74,7 @@ export class InvoicesService {
 
     if (!invoice) return;
 
-    const subtotal = lineItems.reduce((sum, item) => sum + Number(item.total), 0);
+    const subtotal = lineItems.reduce((sum: number, item: any) => sum + Number(item.total), 0);
 
     const discountAmount = invoice.discountType === 'percent'
       ? subtotal * (invoice.discountValue / 100)
@@ -179,18 +178,17 @@ export class InvoicesService {
     if (lineItems !== undefined) {
       await this.lineItemRepository.delete({ invoiceId: id });
       if (lineItems.length > 0) {
-        const lineItemEntities = lineItems.map((item, index) => {
-          const total = item.quantity * item.unitPrice * (1 - (item.discountPercent || 0) / 100);
-          return this.lineItemRepository.create({
+        const lineItemEntities = lineItems.map((item: any, index: number) => {
+          const total = item.quantity * item.unitPrice;
+          return {
             ...item,
             tenantId,
             invoiceId: id,
             total,
-            discountAmount: item.quantity * item.unitPrice * ((item.discountPercent || 0) / 100),
             sortOrder: item.sortOrder ?? index,
-          });
+          };
         });
-        await this.lineItemRepository.save(lineItemEntities);
+        await this.lineItemRepository.save(lineItemEntities as any);
       }
       await this.calculateTotals(id);
     }

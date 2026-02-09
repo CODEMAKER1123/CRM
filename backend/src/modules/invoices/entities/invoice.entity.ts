@@ -7,7 +7,7 @@ import {
   Index,
 } from 'typeorm';
 import { TenantBaseEntity } from '@/common/entities/base.entity';
-import { InvoiceStatus, SyncStatus } from '@/common/enums';
+import { InvoiceStatus, InvoiceType, SyncStatus } from '@/common/enums';
 import { Tenant } from '@/modules/tenants/entities/tenant.entity';
 import { Account } from '@/modules/accounts/entities/account.entity';
 import { Job } from '@/modules/jobs/entities/job.entity';
@@ -17,6 +17,7 @@ import { Payment } from '@/modules/payments/entities/payment.entity';
 @Index(['tenantId', 'status'])
 @Index(['tenantId', 'accountId'])
 @Index(['tenantId', 'dueDate'])
+@Index(['tenantId', 'type'])
 @Index(['tenantId', 'createdAt'])
 export class Invoice extends TenantBaseEntity {
   @ManyToOne(() => Tenant, { onDelete: 'CASCADE' })
@@ -56,10 +57,46 @@ export class Invoice extends TenantBaseEntity {
   })
   status: InvoiceStatus;
 
+  @Column({
+    type: 'enum',
+    enum: InvoiceType,
+    default: InvoiceType.STANDARD,
+  })
+  type: InvoiceType;
+
   @Column({ length: 255, nullable: true })
   title?: string;
 
-  // Financials
+  // Deposit linkage
+  @Column({ name: 'deposit_parent_estimate_id', type: 'uuid', nullable: true })
+  depositParentEstimateId?: string;
+
+  @Column({ name: 'deposit_percentage', type: 'decimal', precision: 5, scale: 2, nullable: true })
+  depositPercentage?: number;
+
+  @Column({ name: 'linked_invoice_id', type: 'uuid', nullable: true })
+  linkedInvoiceId?: string;
+
+  // Financials (cents)
+  @Column({ name: 'subtotal_cents', type: 'int', default: 0 })
+  subtotalCents: number;
+
+  @Column({ name: 'discount_cents', type: 'int', default: 0 })
+  discountCents: number;
+
+  @Column({ name: 'tax_cents', type: 'int', default: 0 })
+  taxCents: number;
+
+  @Column({ name: 'total_cents', type: 'int', default: 0 })
+  totalCents: number;
+
+  @Column({ name: 'amount_paid_cents', type: 'int', default: 0 })
+  amountPaidCents: number;
+
+  @Column({ name: 'balance_due_cents', type: 'int', default: 0 })
+  balanceDueCents: number;
+
+  // Decimal fields (backward compat)
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   subtotal: number;
 
@@ -87,13 +124,16 @@ export class Invoice extends TenantBaseEntity {
   @Column({ name: 'balance_due', type: 'decimal', precision: 10, scale: 2, default: 0 })
   balanceDue: number;
 
-  // Credits
   @Column({ name: 'credits_applied', type: 'decimal', precision: 10, scale: 2, default: 0 })
   creditsApplied: number;
 
+  // Tip tracking
+  @Column({ name: 'tip_cents', type: 'int', default: 0 })
+  tipCents: number;
+
   // Dates
-  @Column({ name: 'issue_date', type: 'date', nullable: true })
-  issueDate?: Date;
+  @Column({ name: 'issued_date', type: 'date', nullable: true })
+  issuedDate?: Date;
 
   @Column({ name: 'due_date', type: 'date', nullable: true })
   dueDate?: Date;
@@ -162,7 +202,6 @@ export class Invoice extends TenantBaseEntity {
   @Column({ name: 'terms_and_conditions', type: 'text', nullable: true })
   termsAndConditions?: string;
 
-  // Void reason
   @Column({ name: 'void_reason', type: 'text', nullable: true })
   voidReason?: string;
 
@@ -241,7 +280,6 @@ export class InvoiceLineItem extends TenantBaseEntity {
   @Column({ name: 'sort_order', type: 'int', default: 0 })
   sortOrder: number;
 
-  // QuickBooks
   @Column({ name: 'quickbooks_item_id', length: 100, nullable: true })
   quickbooksItemId?: string;
 

@@ -173,6 +173,114 @@ export const priceBookApi = {
   getDiscounts: () => api.get<Discount[]>('/discounts'),
 };
 
+// Leads API
+export const leadsApi = {
+  getAll: (params?: Record<string, unknown>) =>
+    api.get<PaginatedResponse<Lead>>('/leads', { params }),
+  getById: (id: string) => api.get<Lead>(`/leads/${id}`),
+  create: (data: CreateLeadInput) => api.post<Lead>('/leads', data),
+  update: (id: string, data: UpdateLeadInput) => api.patch<Lead>(`/leads/${id}`, data),
+  delete: (id: string) => api.delete(`/leads/${id}`),
+  transition: (id: string, data: LeadTransitionInput) =>
+    api.post<Lead>(`/leads/${id}/transition`, data),
+  getActivities: (id: string, params?: Record<string, unknown>) =>
+    api.get<PaginatedResponse<Activity>>(`/leads/${id}/activities`, { params }),
+  addActivity: (id: string, data: CreateActivityInput) =>
+    api.post<Activity>(`/leads/${id}/activities`, data),
+  getStageHistory: (id: string) =>
+    api.get<LeadStageHistory[]>(`/leads/${id}/stage-history`),
+  getPipelineStats: (params?: Record<string, unknown>) =>
+    api.get<PipelineStatsResult>('/leads/pipeline-stats', { params }),
+  convert: (id: string, data: ConvertLeadInput) =>
+    api.post<{ account: Account; job?: Job }>(`/leads/${id}/convert`, data),
+};
+
+// Commissions API
+export const commissionsApi = {
+  // Commission Rules
+  getRules: (params?: Record<string, unknown>) =>
+    api.get<PaginatedResponse<CommissionRule>>('/commissions/rules', { params }),
+  getRuleById: (id: string) => api.get<CommissionRule>(`/commissions/rules/${id}`),
+  createRule: (data: CreateCommissionRuleInput) =>
+    api.post<CommissionRule>('/commissions/rules', data),
+  updateRule: (id: string, data: UpdateCommissionRuleInput) =>
+    api.patch<CommissionRule>(`/commissions/rules/${id}`, data),
+  deleteRule: (id: string) => api.delete(`/commissions/rules/${id}`),
+
+  // Bonus Rules
+  getBonusRules: (params?: Record<string, unknown>) =>
+    api.get<PaginatedResponse<BonusRule>>('/commissions/bonus-rules', { params }),
+  getBonusRuleById: (id: string) => api.get<BonusRule>(`/commissions/bonus-rules/${id}`),
+  createBonusRule: (data: CreateBonusRuleInput) =>
+    api.post<BonusRule>('/commissions/bonus-rules', data),
+  updateBonusRule: (id: string, data: UpdateBonusRuleInput) =>
+    api.patch<BonusRule>(`/commissions/bonus-rules/${id}`, data),
+  deleteBonusRule: (id: string) => api.delete(`/commissions/bonus-rules/${id}`),
+
+  // Commission Records
+  getRecords: (params?: Record<string, unknown>) =>
+    api.get<PaginatedResponse<CommissionRecord>>('/commissions/records', { params }),
+  getRecordById: (id: string) => api.get<CommissionRecord>(`/commissions/records/${id}`),
+  approveRecord: (id: string, notes?: string) =>
+    api.post<CommissionRecord>(`/commissions/records/${id}/approve`, { notes }),
+  rejectRecord: (id: string, notes?: string) =>
+    api.post<CommissionRecord>(`/commissions/records/${id}/reject`, { notes }),
+
+  // Bonus Records
+  getBonusRecords: (params?: Record<string, unknown>) =>
+    api.get<PaginatedResponse<BonusRecord>>('/commissions/bonus-records', { params }),
+
+  // Job Expenses
+  getJobExpenses: (jobId: string) =>
+    api.get<JobExpense[]>(`/commissions/jobs/${jobId}/expenses`),
+  addJobExpense: (jobId: string, data: CreateJobExpenseInput) =>
+    api.post<JobExpense>(`/commissions/jobs/${jobId}/expenses`, data),
+  deleteJobExpense: (jobId: string, expenseId: string) =>
+    api.delete(`/commissions/jobs/${jobId}/expenses/${expenseId}`),
+
+  // Reports
+  getReport: (params: CommissionReportParams) =>
+    api.get<CommissionReport>('/commissions/reports', { params }),
+  getPayPeriodSummary: (params: { userId?: string; payPeriodStart: string; payPeriodEnd: string }) =>
+    api.get<PayPeriodSummary>('/commissions/reports/pay-period-summary', { params }),
+};
+
+// Automations API
+export const automationsApi = {
+  // Automation Rules
+  getRules: (params?: Record<string, unknown>) =>
+    api.get<PaginatedResponse<AutomationRule>>('/automations/rules', { params }),
+  getRuleById: (id: string) => api.get<AutomationRule>(`/automations/rules/${id}`),
+  createRule: (data: CreateAutomationRuleInput) =>
+    api.post<AutomationRule>('/automations/rules', data),
+  updateRule: (id: string, data: UpdateAutomationRuleInput) =>
+    api.patch<AutomationRule>(`/automations/rules/${id}`, data),
+  deleteRule: (id: string) => api.delete(`/automations/rules/${id}`),
+  toggleRule: (id: string, isActive: boolean) =>
+    api.patch<AutomationRule>(`/automations/rules/${id}/toggle`, { isActive }),
+
+  // Executions
+  getExecutions: (params?: Record<string, unknown>) =>
+    api.get<PaginatedResponse<AutomationExecution>>('/automations/executions', { params }),
+  getExecutionById: (id: string) => api.get<AutomationExecution>(`/automations/executions/${id}`),
+
+  // Follow-up Sequences
+  getFollowUpSequences: (params?: Record<string, unknown>) =>
+    api.get<PaginatedResponse<FollowUpSequence>>('/automations/follow-up-sequences', { params }),
+  getFollowUpSequenceById: (id: string) =>
+    api.get<FollowUpSequence>(`/automations/follow-up-sequences/${id}`),
+  createFollowUpSequence: (data: CreateFollowUpSequenceInput) =>
+    api.post<FollowUpSequence>('/automations/follow-up-sequences', data),
+  updateFollowUpSequence: (id: string, data: UpdateFollowUpSequenceInput) =>
+    api.patch<FollowUpSequence>(`/automations/follow-up-sequences/${id}`, data),
+  pauseFollowUpSequence: (id: string) =>
+    api.post<FollowUpSequence>(`/automations/follow-up-sequences/${id}/pause`),
+  resumeFollowUpSequence: (id: string) =>
+    api.post<FollowUpSequence>(`/automations/follow-up-sequences/${id}/resume`),
+  cancelFollowUpSequence: (id: string) =>
+    api.post<FollowUpSequence>(`/automations/follow-up-sequences/${id}/cancel`),
+};
+
 // Types
 export interface Account {
   id: string;
@@ -294,6 +402,204 @@ export interface Payment {
   paymentDate: string;
 }
 
+export interface Lead {
+  id: string;
+  source: string;
+  sourceType: string;
+  businessLine: string;
+  pipeline: string;
+  stage: string;
+  contactName: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  companyName?: string;
+  addressLine1?: string;
+  city?: string;
+  state?: string;
+  zip?: string;
+  assignedRepId?: string;
+  accountId?: string;
+  propertyId?: string;
+  lossReason?: string;
+  lossNotes?: string;
+  wonAt?: string;
+  lostAt?: string;
+  notes?: string;
+  tags?: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Activity {
+  id: string;
+  leadId?: string;
+  accountId?: string;
+  jobId?: string;
+  type: string;
+  direction?: string;
+  subject?: string;
+  body?: string;
+  outcome?: string;
+  createdBy: string;
+  createdAt: string;
+}
+
+export interface LeadStageHistory {
+  id: string;
+  leadId: string;
+  fromStage: string;
+  toStage: string;
+  changedBy: string;
+  changedAt: string;
+  reason?: string;
+}
+
+export interface CommissionRule {
+  id: string;
+  name: string;
+  roleType: string;
+  businessLine: string;
+  conditions: Record<string, unknown>;
+  rate: number;
+  base: string;
+  trigger: string;
+  deductibleExpenseCategories: string[];
+  isActive: boolean;
+  effectiveDate: string;
+  endDate?: string;
+  previousVersionId?: string;
+}
+
+export interface BonusRule {
+  id: string;
+  name: string;
+  roleType: string;
+  businessLine: string;
+  metric: string;
+  thresholdCents: number;
+  bonusAmountCents: number;
+  period: string;
+  isActive: boolean;
+}
+
+export interface CommissionRecord {
+  id: string;
+  userId: string;
+  jobId: string;
+  ruleId: string;
+  roleType: string;
+  payPeriodStart: string;
+  payPeriodEnd: string;
+  grossRevenueCents: number;
+  deductionsCents: number;
+  commissionBaseCents: number;
+  commissionRate: number;
+  commissionCents: number;
+  status: string;
+  approvedBy?: string;
+  approvedAt?: string;
+  notes?: string;
+}
+
+export interface BonusRecord {
+  id: string;
+  userId: string;
+  ruleId: string;
+  periodStart: string;
+  periodEnd: string;
+  metricValueCents: number;
+  thresholdCents: number;
+  bonusAmountCents: number;
+  status: string;
+}
+
+export interface AutomationRule {
+  id: string;
+  name: string;
+  isActive: boolean;
+  trigger: {
+    event: string;
+    conditions: Record<string, unknown>;
+  };
+  actions: AutomationAction[];
+  constraints?: Record<string, unknown>;
+  executionLog?: AutomationExecution[];
+  testMode: boolean;
+  description?: string;
+}
+
+export interface AutomationAction {
+  type: string;
+  config: Record<string, unknown>;
+}
+
+export interface AutomationExecution {
+  id: string;
+  ruleId: string;
+  entityType: string;
+  entityId: string;
+  triggerEvent: string;
+  conditionsPassed: boolean;
+  actionsTaken: { type: string; result: string }[];
+  suppressionReason?: string;
+  isTestMode: boolean;
+  executedAt: string;
+}
+
+export interface FollowUpSequence {
+  id: string;
+  leadId: string;
+  status: string;
+  currentStep: number;
+  steps: FollowUpStep[];
+  nextStepAt?: string;
+  startedAt: string;
+  completedAt?: string;
+  pausedAt?: string;
+}
+
+export interface FollowUpStep {
+  stepNumber: number;
+  type: string;
+  delayMinutes: number;
+  config: Record<string, unknown>;
+  executedAt?: string;
+  result?: string;
+}
+
+export interface JobExpense {
+  id: string;
+  jobId: string;
+  category: string;
+  description?: string;
+  amountCents: number;
+  createdAt: string;
+}
+
+export interface PipelineStatsResult {
+  stages: { stage: string; count: number; valueCents: number }[];
+  conversionRate: number;
+  averageDaysInPipeline: number;
+}
+
+export interface CommissionReport {
+  records: CommissionRecord[];
+  totalCommissionCents: number;
+  totalBonusCents: number;
+  totalPayoutCents: number;
+}
+
+export interface PayPeriodSummary {
+  userId: string;
+  payPeriodStart: string;
+  payPeriodEnd: string;
+  commissionRecords: CommissionRecord[];
+  bonusRecords: BonusRecord[];
+  totalCommissionCents: number;
+  totalBonusCents: number;
+  totalPayoutCents: number;
+}
+
 // Input types
 export interface CreateAccountInput {
   name: string;
@@ -398,6 +704,132 @@ export interface PriceCalculationResult {
   basePrice: number;
   adjustments: { name: string; amount: number }[];
   totalPrice: number;
+}
+
+// Lead Input Types
+export interface CreateLeadInput {
+  source: string;
+  sourceType: string;
+  businessLine: string;
+  pipeline?: string;
+  contactName: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  companyName?: string;
+  addressLine1?: string;
+  city?: string;
+  state?: string;
+  zip?: string;
+  assignedRepId?: string;
+  notes?: string;
+  tags?: string[];
+}
+
+export interface UpdateLeadInput extends Partial<CreateLeadInput> {}
+
+export interface LeadTransitionInput {
+  stage: string;
+  reason?: string;
+  lossReason?: string;
+  lossNotes?: string;
+}
+
+export interface CreateActivityInput {
+  type: string;
+  direction?: string;
+  subject?: string;
+  body?: string;
+  outcome?: string;
+}
+
+export interface ConvertLeadInput {
+  createJob?: boolean;
+  jobType?: string;
+  serviceAddressId?: string;
+  notes?: string;
+}
+
+// Commission Input Types
+export interface CreateCommissionRuleInput {
+  name: string;
+  roleType: string;
+  businessLine: string;
+  conditions: Record<string, unknown>;
+  rate: number;
+  base: string;
+  trigger: string;
+  deductibleExpenseCategories?: string[];
+  effectiveDate: string;
+  endDate?: string;
+}
+
+export interface UpdateCommissionRuleInput extends Partial<CreateCommissionRuleInput> {
+  isActive?: boolean;
+}
+
+export interface CreateBonusRuleInput {
+  name: string;
+  roleType: string;
+  businessLine: string;
+  metric: string;
+  thresholdCents: number;
+  bonusAmountCents: number;
+  period: string;
+}
+
+export interface UpdateBonusRuleInput extends Partial<CreateBonusRuleInput> {
+  isActive?: boolean;
+}
+
+export interface CreateJobExpenseInput {
+  category: string;
+  description?: string;
+  amountCents: number;
+}
+
+export interface CommissionReportParams {
+  userId?: string;
+  payPeriodStart?: string;
+  payPeriodEnd?: string;
+  roleType?: string;
+  businessLine?: string;
+  status?: string;
+}
+
+// Automation Input Types
+export interface CreateAutomationRuleInput {
+  name: string;
+  trigger: {
+    event: string;
+    conditions: Record<string, unknown>;
+  };
+  actions: AutomationAction[];
+  constraints?: Record<string, unknown>;
+  testMode?: boolean;
+  description?: string;
+}
+
+export interface UpdateAutomationRuleInput extends Partial<CreateAutomationRuleInput> {}
+
+export interface CreateFollowUpSequenceInput {
+  leadId: string;
+  steps: {
+    stepNumber: number;
+    type: string;
+    delayMinutes: number;
+    config: Record<string, unknown>;
+  }[];
+}
+
+export interface UpdateFollowUpSequenceInput {
+  steps?: {
+    stepNumber: number;
+    type: string;
+    delayMinutes: number;
+    config: Record<string, unknown>;
+  }[];
+  currentStep?: number;
+  nextStepAt?: string;
 }
 
 export default api;
