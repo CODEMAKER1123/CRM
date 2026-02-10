@@ -70,8 +70,8 @@ export class EstimatesService {
     if (!estimate) return;
 
     const subtotal = lineItems
-      .filter(item => !item.optional)
-      .reduce((sum, item) => sum + Number(item.total), 0);
+      .filter((item: EstimateLineItem) => !item.optional)
+      .reduce((sum: number, item: EstimateLineItem) => sum + Number(item.total), 0);
 
     const discountAmount = estimate.discountType === 'percent'
       ? subtotal * (estimate.discountValue / 100)

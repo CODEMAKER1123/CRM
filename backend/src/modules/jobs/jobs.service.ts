@@ -292,7 +292,7 @@ export class JobsService {
     const history = this.statusHistoryRepository.create({
       tenantId,
       jobId,
-      previousStatus,
+      previousStatus: previousStatus || undefined,
       newStatus,
       changedBy,
       reason,

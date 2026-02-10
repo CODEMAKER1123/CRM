@@ -61,7 +61,7 @@ export class CompanyCamService {
     });
     return {
       connected: !!connection?.isActive,
-      connection,
+      connection: connection || undefined,
     };
   }
 

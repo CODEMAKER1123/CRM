@@ -1,0 +1,57 @@
+services:
+  # Backend API
+  - type: web
+    name: field-service-crm-api
+    runtime: node
+    repo: https://github.com/wenmoonmatt/field-service-crm
+    branch: main
+    buildCommand: cd backend && npm install && npm run build
+    startCommand: cd backend && npm run start:prod
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: field-service-crm-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: field-service-crm-redis
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: API_PREFIX
+        value: api
+    healthCheckPath: /api/health
+
+  # Frontend
+  - type: web
+    name: field-service-crm-web
+    runtime: node
+    repo: https://github.com/wenmoonmatt/field-service-crm
+    branch: main
+    buildCommand: cd frontend && npm install && npm run build
+    startCommand: cd frontend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: NEXT_PUBLIC_API_URL
+        fromService:
+          type: web
+          name: field-service-crm-api
+          property: url
+
+databases:
+  - name: field-service-crm-db
+    databaseName: fieldservice
+    user: fieldservice
+    plan: starter
+
+redis:
+  - name: field-service-crm-redis
+    plan: starter

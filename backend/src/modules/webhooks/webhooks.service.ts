@@ -234,7 +234,7 @@ export class WebhooksService {
     const webhook = delivery.webhook;
 
     delivery.status = 'pending';
-    delivery.nextRetryAt = null;
+    delivery.nextRetryAt = undefined;
     await this.deliveryRepository.save(delivery);
 
     await this.attemptDelivery(delivery, webhook);
@@ -252,7 +252,7 @@ export class WebhooksService {
     ipAddress?: string,
   ): Promise<InboundWebhook> {
     const inbound = this.inboundRepository.create({
-      tenantId,
+      tenantId: tenantId || undefined,
       source,
       event,
       payload,

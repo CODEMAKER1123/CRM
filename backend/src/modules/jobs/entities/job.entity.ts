@@ -292,6 +292,10 @@ export class JobStatusHistory extends TenantBaseEntity {
   @JoinColumn({ name: 'tenant_id' })
   tenant: Tenant;
 
+  // Explicitly redeclare tenantId to avoid confusion with relation
+  @Column({ name: 'tenant_id', type: 'uuid' })
+  tenantId: string;
+
   @Column({ name: 'job_id', type: 'uuid' })
   jobId: string;
 
